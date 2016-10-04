@@ -8,15 +8,39 @@ module.exports = function(homebridge){
 }
 
 function SimpliSafeSecuritySystemAccessory(log, config) {
+
     this.log = log;
 
-    this.httpMethod = config["http_method"] || "GET";
     this.auth = {
         username: config.auth.username,
         password: config.auth.password,
-    },
+    };
 
     this.name = config["name"];
+
+    this.convertSimpliSafeStateToHomeKitState = function(simpliSafeState) {
+        switch (simpliSafeState) {
+            case "home":
+                return Characteristic.SecuritySystemCurrentState.STAY_ARM;
+            case "away":
+                return Characteristic.SecuritySystemCurrentState.AWAY_ARM;
+            case "off":
+                return Characteristic.SecuritySystemCurrentState.DISARMED;
+            default:
+                return 3;
+        };
+    };
+
+    this.getSimpliSafeSession = function() {
+        simplisafe({ user: this.auth.username, password: this.auth.password }, function (er, client) {
+            if (er) {
+                return er;
+            } else {
+                return client;
+            }
+        });
+    };
+
 }
 
 SimpliSafeSecuritySystemAccessory.prototype = {
@@ -38,20 +62,29 @@ SimpliSafeSecuritySystemAccessory.prototype = {
                 break;
         }
         // Set state in simplisafe 'off' or 'home' or 'away'
-		simplisafe({ user: this.auth.user, password: this.auth.password }, function (er, client) {
-			if (er) this.log(er);
-            client.setState(state, function() {
-                callback(null, client.info.state);
+		simplisafe({ user: this.auth.username, password: this.auth.password }, function (er, client) {
+			if (er) callback(er);
+            client.setState(state, function(error) {
+                if (error) {
+                    callback(error);
+                } else {
+                    var homeKitState = this.convertSimpliSafeStateToHomeKitState(client.info.state);
+                    this.service.setCharacteristic(Characteristic.SecuritySystemCurrentState, homeKitState);
+                    callback(null, homeKitState);
+                }
+                client.logout(function(er) {}); // Log out, clean out the connection
             }); // this is really slow. Like 10-to-20 seconds slow
-            client.logout(function(er) {}); // Log out, clean out the connection
-		});
+		}.bind(this));
     },
 
     getState: function(callback) {
-        simplisafe({ user: this.auth.user, password: this.auth.password }, function (er, client) {
-            if (er) this.log(er);
-            callback(null, client.info.state);
-        });
+        simplisafe({ user: this.auth.username, password: this.auth.password }, function (er, client) {
+            if (er) {
+                callback(er);
+            } else {
+                callback(null, this.convertSimpliSafeStateToHomeKitState(client.info.state));
+            }
+        }.bind(this));
     },
 
     getCurrentState: function(callback) {
@@ -68,18 +101,20 @@ SimpliSafeSecuritySystemAccessory.prototype = {
     },
 
     getServices: function() {
-        var securityService = new Service.SecuritySystem(this.name);
 
-        securityService
+        this.service = new Service.SecuritySystem(this.name);
+
+        this.service
             .getCharacteristic(Characteristic.SecuritySystemCurrentState)
             .on('get', this.getCurrentState.bind(this));
 
-        securityService
+        this.service
             .getCharacteristic(Characteristic.SecuritySystemTargetState)
             .on('get', this.getTargetState.bind(this))
             .on('set', this.setTargetState.bind(this));
 
-        return [securityService];
+        return [this.service];
+
     }
 };
 
