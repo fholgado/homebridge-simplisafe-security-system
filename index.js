@@ -37,12 +37,13 @@ SimpliSafeSecuritySystemAccessory.prototype = {
 				state = "off";
                 break;
         }
-        // Set state in simplisafe
+        // Set state in simplisafe 'off' or 'home' or 'away'
 		simplisafe({ user: this.auth.user, password: this.auth.password }, function (er, client) {
 			if (er) this.log(er);
-            // client.info.state // 'off' or 'home' or 'away'
-            client.setState(state, function (er) {}) // this is really slow. Like 10-to-20 seconds slow
-            client.logout(function (er) {}) // Log out, clean out the connection
+            client.setState(state, function() {
+                callback(null, client.info.state);
+            }); // this is really slow. Like 10-to-20 seconds slow
+            client.logout(function(er) {}); // Log out, clean out the connection
 		});
     },
 
