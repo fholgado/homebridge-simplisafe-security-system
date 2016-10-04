@@ -6,9 +6,9 @@
   "keywords": [
     "homebridge-plugin",
     "homebridge",
-	"simplisafe",
-	"security",
-	"alarm",
+    "simplisafe",
+    "security",
+    "alarm",
     "homekit"
   ],
   "engines": {
@@ -24,7 +24,7 @@
     "url": "git://github.com/fholgado/homebridge-simplisafe.git"
   },
   "dependencies": {
-    "simplisafe": "^1.0.0"
+    "simplisafe": "1.0.0"
   },
   "readmeFilename": "README.md",
   "bugs": {
