@@ -4,7 +4,7 @@ var simplisafe = require("simplisafe");
 module.exports = function(homebridge){
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
-    homebridge.registerAccessory("homebridge-simplisafe", "Http-SimpliSafe", SimpliSafeSecuritySystemAccessory);
+    homebridge.registerAccessory("homebridge-simplisafe", "Homebridge-SimpliSafe", SimpliSafeSecuritySystemAccessory);
 }
 
 function SimpliSafeSecuritySystemAccessory(log, config) {
