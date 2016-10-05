@@ -3,7 +3,7 @@
 This project is a [Homebridge](https://github.com/nfarina/homebridge) pluging that allows you to control your SimpliSafe alarm system with the iOS 10 Home app as well as through Siri. This project uses the [SimpliSafe node.js wrapper](https://github.com/searls/simplisafe) made by [@searls](https://github.com/searls).
 
 ## Installation
-    npm install -g homebridge-simplisafe
+    npm install -g homebridge-simplisafe-security-system
 
 ## Configuration
     {
