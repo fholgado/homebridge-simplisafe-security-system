@@ -1,8 +1,8 @@
 {
-  "name": "homebridge-simplisafe",
-  "version": "0.1.0",
+  "name": "homebridge-simplisafe-security-system",
+  "version": "0.1.2",
   "description": "Control your SimpliSafe alarm system from your iOS device using HomeKit and Homebridge.",
-  "license": "BSD-2-Clause",
+  "license": "MIT",
   "keywords": [
     "homebridge-plugin",
     "homebridge",
