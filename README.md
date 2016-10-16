@@ -34,3 +34,8 @@ This project is a [Homebridge](https://github.com/nfarina/homebridge) pluging th
             }
         ]
     }
+
+## Development
+You can run a checked out version of this plugin in development by running the following command:
+
+    sudo DEBUG=* /usr/local/bin/homebridge -D -U /var/homebridge -P ~/homebridge-simplisafe/
