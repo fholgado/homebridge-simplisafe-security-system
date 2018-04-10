@@ -106,7 +106,7 @@ SS3Client.prototype.invokeSSPost = function(reqOptions) {
 
 SS3Client.prototype.initUserId = function() {
 	var thisObj = this
-	return this.authCheck()
+	return this.getUserId()
 		.then(function(parsedBody) {
 			var userId = parsedBody.userId
 			thisObj.userId = userId
@@ -163,13 +163,27 @@ SS3Client.prototype.authCheck = function() {
 			'Authorization': thisObj.token_type + ' ' + thisObj.token
 		}
 	}
+	return request.get(reqOptions)
+}
+
+SS3Client.prototype.getUserId = function() {
+	var thisObj = this
+	var reqOptions = {
+		url: 'https://api.simplisafe.com/v1/api/authCheck',
+		json: true,
+		jar: true,
+		headers: {
+			'Content-Type': 'application/json; charset=utf-8',
+			'Authorization': thisObj.token_type + ' ' + thisObj.token
+		}
+	}
 	return this.invokeSSGet(reqOptions)
 }
 
 SS3Client.prototype.getSub = function(subId) {
 	var thisObj = this
 	var reqOptions = {
-		url: 'https://api.simplisafe.com/v1/subscriptions/' + thisObj.subId + '/',
+		url: 'https://api.simplisafe.com/v1/subscriptions/' + subId + '/',
 		json: true,
 		jar: true,
 		headers: {

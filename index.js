@@ -22,6 +22,7 @@ function SimpliSafeSecuritySystemAccessory(log, config) {
 			return ss3Client.getAlarmState()
 		}, function(err) {
 			log('Login failed due to: ' + err.message)
+			throw err
 		})
 		.then(function(alarmState) {
 			log('alarmState: ' + alarmState)
@@ -59,7 +60,7 @@ function SimpliSafeSecuritySystemAccessory(log, config) {
 				return Characteristic.SecuritySystemTargetState.DISARM;
 				break;
 			default:
-				console.log('Could not resolve SS state: ' + simpliSafeState + ' to Homekit security system state')
+				log('Could not resolve SS state: ' + simpliSafeState + ' to Homekit security system state')
 				return null
 				break;
 		}
