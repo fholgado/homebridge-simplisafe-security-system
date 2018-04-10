@@ -3,9 +3,22 @@ require('any-promise/register/q')
 var request = require('request-promise-any')
 var Q = require('q')
 
-function SS3Client(username, password) {
+var logFunc
+function log(msg) {
+	if (logFunc) {
+		logFunc(msg)
+	}
+}
+
+function logErr(msg, err) {
+	var fullMsg = msg + (err ? (' ' + err.message) : '')
+	log(fullMsg)
+}
+
+function SS3Client(username, password, loggerFunc) {
 	this.username = username
 	this.password = password
+	logFunc = loggerFunc
 }
 
 SS3Client.prototype.login = function() {
@@ -13,6 +26,9 @@ SS3Client.prototype.login = function() {
 	return this.initToken()
 		.then(function() {
 			return thisObj.initUserId()
+		}, function(err) {
+			logErr('SS3Client: Failed to login', err)
+			throw err
 		})
 		.then(function() {
 			return thisObj.initSubId()
@@ -45,6 +61,9 @@ SS3Client.prototype.initToken = function() {
 		var expireDate = new Date()
 		expireDate.setSeconds(expireDate.getSeconds() + Math.round(thisObj.expires_in * 0.9));
 		thisObj.expireDate = expireDate
+	}, function(err) {
+		logErr('SS3Client: Failed to initToken:', err)
+		throw err
 	})
 }
 
@@ -54,13 +73,21 @@ SS3Client.prototype.isExpired = function() {
 }
 
 SS3Client.prototype.initTokenIfNeeded = function() {
-	if (this.isExpired()) {
-		return this.initToken()
-	} else {
-		var deferred = Q.defer()
-		deferred.resolve()
-		return deferred.promise
-	}
+	var thisObj = this
+	return this.authCheck()
+		.then(function() {
+			if (thisObj.isExpired()) {
+				log('Auth check passed, but token is about to expire so acquiring new token')
+				return thisObj.initToken()
+			} else {
+				var deferred = Q.defer()
+				deferred.resolve()
+				return deferred.promise
+			}
+		}, function() {
+			log('Auth check failed so acquiring new token')
+			return thisObj.initToken()
+		})
 }
 
 SS3Client.prototype.invokeSSGet = function(reqOptions) {

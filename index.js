@@ -12,7 +12,7 @@ var ss3Client
 function SimpliSafeSecuritySystemAccessory(log, config) {
 	this.log = log;
 
-	ss3Client = new SS3Client(config.auth.username, config.auth.password)
+	ss3Client = new SS3Client(config.auth.username, config.auth.password, log)
 
 	ss3Client.login()
 		.then(function() {
@@ -20,6 +20,8 @@ function SimpliSafeSecuritySystemAccessory(log, config) {
 			log('ss3Client.userId: ' + ss3Client.userId)
 			log('ss3Client.subId: ' + ss3Client.subId)
 			return ss3Client.getAlarmState()
+		}, function(err) {
+			log('Login failed due to: ' + err.message)
 		})
 		.then(function(alarmState) {
 			log('alarmState: ' + alarmState)
@@ -56,6 +58,10 @@ function SimpliSafeSecuritySystemAccessory(log, config) {
 			case "OFF":
 				return Characteristic.SecuritySystemTargetState.DISARM;
 				break;
+			default:
+				console.log('Could not resolve SS state: ' + simpliSafeState + ' to Homekit security system state')
+				return null
+				break;
 		}
 		;
 	};
@@ -74,6 +80,8 @@ SimpliSafeSecuritySystemAccessory.prototype = {
 				// Important: after a successful server response, we update the current state of the system
 				self.securityService.setCharacteristic(Characteristic.SecuritySystemCurrentState, state);
 				callback(null, state);
+			}, function() {
+				callback(new Error('Failed to set target state to ' + state))
 			})
 	},
 
@@ -82,6 +90,8 @@ SimpliSafeSecuritySystemAccessory.prototype = {
 		ss3Client.getAlarmState().then(function(state) {
 			self.log("getting alarm state:", state);
 			callback(null, self.convertSimpliSafeStateToHomeKitState(state));
+		}, function() {
+			callback(new Error('Failed to get alarm state'))
 		})
 	},
 
