@@ -12,7 +12,7 @@ var ss3Client
 function SimpliSafeSecuritySystemAccessory(log, config) {
 	this.log = log;
 
-	ss3Client = new SS3Client(config.auth.username, config.auth.password, log)
+	ss3Client = new SS3Client(config.auth.username, config.auth.password, config.auth.retryInSec, log)
 
 	ss3Client.login()
 		.then(function() {

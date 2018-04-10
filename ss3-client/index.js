@@ -4,6 +4,7 @@ var request = require('request-promise-any')
 var Q = require('q')
 
 var logFunc
+
 function log(msg) {
 	if (logFunc) {
 		logFunc(msg)
@@ -15,9 +16,11 @@ function logErr(msg, err) {
 	log(fullMsg)
 }
 
-function SS3Client(username, password, loggerFunc) {
+function SS3Client(username, password, retryInSec, retries, loggerFunc) {
 	this.username = username
 	this.password = password
+	this.retryInSec = retryInSec || 3
+	this.retries = retries || 3
 	logFunc = loggerFunc
 }
 
@@ -196,15 +199,45 @@ SS3Client.prototype.getSub = function(subId) {
 
 /**
  *
- * @returns {PromiseLike<T> | Promise<T>} Can be one of OFF, HOME, AWAY
+ * @returns {PromiseLike<T> | Promise<T>} Can be one of OFF, HOME, AWAY, AWAY_COUNT, HOME_COUNT
  */
 SS3Client.prototype.getAlarmState = function() {
-	return this.getSub(this.subId)
-		.then(function(parsedBody) {
-				var alarmState = parsedBody.subscription.location.system.alarmState
+	var retriesLeft = this.retries
+	var self = this
+	return this.getAlarmStateNoRetry()
+		.then(function(alarmState) {
+			if (alarmState === 'error') {
+				log('get alarm state: ' + alarmState + ' so retrying getAlarmState in ' + self.retryInSec + ' seconds')
+				var getAlarmStateFunc = self.getAlarmStateNoRetry.bind(self)
+				var deferred = Q.defer()
+
+				function retryGetAlarmState(retriesLeft) {
+					retriesLeft--
+					getAlarmStateFunc()
+						.then(function(alState) {
+							if (alState === 'error' && retriesLeft > 0) {
+								log('get alarm state: ' + alarmState + ' so retrying getAlarmState in ' + self.retryInSec + ' seconds')
+								setTimeout(retryGetAlarmState, self.retryInSec * 1000, retriesLeft)
+							} else {
+								deferred.resolve(alState)
+							}
+						})
+				}
+
+				setTimeout(retryGetAlarmState, self.retryInSec * 1000, retriesLeft)
+				return deferred.promise
+			} else {
 				return alarmState
 			}
-		)
+		})
+}
+
+SS3Client.prototype.getAlarmStateNoRetry = function() {
+	return this.getSub(this.subId)
+		.then(function(parsedBody) {
+			var alarmState = parsedBody.subscription.location.system.alarmState
+			return alarmState
+		})
 }
 
 module.exports = SS3Client
