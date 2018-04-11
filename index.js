@@ -16,16 +16,16 @@ function SimpliSafeSecuritySystemAccessory(log, config) {
 
 	ss3Client.login()
 		.then(function() {
-			log('ss3Client.token: ' + ss3Client.token)
-			log('ss3Client.userId: ' + ss3Client.userId)
-			log('ss3Client.subId: ' + ss3Client.subId)
+			log('User ID: ' + ss3Client.userId)
+			log('Sub ID: ' + ss3Client.subId)
+			log('Initial token: ' + ss3Client.token)
 			return ss3Client.getAlarmState()
 		}, function(err) {
 			log('Login failed due to: ' + err.message)
 			throw err
 		})
 		.then(function(alarmState) {
-			log('alarmState: ' + alarmState)
+			log('Initial alarm state: ' + alarmState)
 		})
 
 	this.name = config["name"];
@@ -89,7 +89,7 @@ SimpliSafeSecuritySystemAccessory.prototype = {
 	getState: function(callback) {
 		var self = this;
 		ss3Client.getAlarmState().then(function(state) {
-			self.log("getting alarm state:", state);
+			self.log("got SS alarm state:", state);
 			callback(null, self.convertSimpliSafeStateToHomeKitState(state));
 		}, function() {
 			callback(new Error('Failed to get alarm state'))

@@ -13,7 +13,7 @@
             "auth": {
                 "username": "your@email.com",
                 "password": "yourawesomepassword",
-                "retryInSec": 3,
+                "retryInSec": 1,
                 "retries": 3
             }
         }

@@ -19,7 +19,7 @@ function logErr(msg, err) {
 function SS3Client(username, password, retryInSec, retries, loggerFunc) {
 	this.username = username
 	this.password = password
-	this.retryInSec = retryInSec || 3
+	this.retryInSec = retryInSec || 1
 	this.retries = retries || 3
 	logFunc = loggerFunc
 }
@@ -58,6 +58,7 @@ SS3Client.prototype.initToken = function() {
 
 	}).then(function(parsedBody) {
 		var token = parsedBody.access_token
+		log('SS3Client new token: ' + token)
 		thisObj.token = token
 		thisObj.expires_in = parsedBody.expires_in
 		thisObj.token_type = parsedBody.token_type
@@ -75,12 +76,33 @@ SS3Client.prototype.isExpired = function() {
 	return currDate > this.expireDate
 }
 
+var initTokenQueue = []
+var initTokenInProgress = false
+
+function resolveTokenQueue() {
+	while (initTokenQueue.length) {
+		var deferred = initTokenQueue.pop()
+		deferred.resolve()
+	}
+	initTokenInProgress = false
+}
+
 SS3Client.prototype.initTokenIfNeeded = function() {
+	if (initTokenInProgress) {
+		// create deferred and add to queue
+		var deferred = Q.defer()
+		initTokenQueue.push(deferred)
+		return deferred.promise
+	}
+
+	initTokenInProgress = true
+
+	// check if queue is
 	var thisObj = this
 	return this.authCheck()
 		.then(function() {
 			if (thisObj.isExpired()) {
-				log('Auth check passed, but token is about to expire so acquiring new token')
+				log('SS3Client Auth check passed, but token is about to expire so acquiring new token. old token: ' + thisObj.token)
 				return thisObj.initToken()
 			} else {
 				var deferred = Q.defer()
@@ -88,9 +110,10 @@ SS3Client.prototype.initTokenIfNeeded = function() {
 				return deferred.promise
 			}
 		}, function() {
-			log('Auth check failed so acquiring new token')
+			log('SS3Client Auth check failed so acquiring new token. old token: ' + thisObj.token)
 			return thisObj.initToken()
 		})
+		.finally(resolveTokenQueue)
 }
 
 SS3Client.prototype.invokeSSGet = function(reqOptions) {
@@ -201,16 +224,17 @@ SS3Client.prototype.getAlarmState = function() {
 	return this.getAlarmStateNoRetry()
 		.then(function(alarmState) {
 			if (alarmState === 'error') {
-				log('get alarm state: ' + alarmState + ' so retrying getAlarmState in ' + self.retryInSec + ' seconds')
+				log('SS3Client got alarm state: ' + alarmState + ' so retrying getAlarmState in ' + self.retryInSec + ' seconds')
 				var getAlarmStateFunc = self.getAlarmStateNoRetry.bind(self)
 				var deferred = Q.defer()
 
 				function retryGetAlarmState(retriesLeft) {
 					retriesLeft--
+					log('SS3Client retrying getAlarmState, retriesLeft: ' + retriesLeft)
 					getAlarmStateFunc()
 						.then(function(alState) {
 							if (alState === 'error' && retriesLeft > 0) {
-								log('get alarm state: ' + alarmState + ' so retrying getAlarmState in ' + self.retryInSec + ' seconds')
+								log('SS3Client got alarm state: ' + alarmState + ' so retrying getAlarmState in ' + self.retryInSec + ' seconds')
 								setTimeout(retryGetAlarmState, self.retryInSec * 1000, retriesLeft)
 							} else {
 								deferred.resolve(alState)
