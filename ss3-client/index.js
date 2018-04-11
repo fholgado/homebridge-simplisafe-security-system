@@ -94,15 +94,25 @@ SS3Client.prototype.initTokenIfNeeded = function() {
 }
 
 SS3Client.prototype.invokeSSGet = function(reqOptions) {
+	var thisObj = this
 	return this.initTokenIfNeeded()
 		.then(function() {
+			reqOptions.headers = {
+				'Content-Type': 'application/json; charset=utf-8',
+				'Authorization': thisObj.token_type + ' ' + thisObj.token
+			}
 			return request.get(reqOptions)
 		})
 }
 
 SS3Client.prototype.invokeSSPost = function(reqOptions) {
+	var thisObj = this
 	return this.initTokenIfNeeded()
 		.then(function() {
+			reqOptions.headers = {
+				'Content-Type': 'application/json; charset=utf-8',
+				'Authorization': thisObj.token_type + ' ' + thisObj.token
+			}
 			return request.post(reqOptions)
 		})
 }
@@ -121,11 +131,7 @@ SS3Client.prototype.initSubId = function() {
 	var reqOptions = {
 		url: 'https://api.simplisafe.com/v1/users/' + thisObj.userId + '/subscriptions?activeOnly=false',
 		json: true,
-		jar: true,
-		headers: {
-			'Content-Type': 'application/json; charset=utf-8',
-			'Authorization': thisObj.token_type + ' ' + thisObj.token
-		}
+		jar: true
 	}
 	return this.invokeSSGet(reqOptions)
 		.then(function(parsedBody) {
@@ -146,11 +152,7 @@ SS3Client.prototype.setState = function(state) {
 	var reqOptions = {
 		url: 'https://api.simplisafe.com/v1/ss3/subscriptions/' + thisObj.subId + '/state/' + state,
 		json: true,
-		jar: true,
-		headers: {
-			'Content-Type': 'application/json; charset=utf-8',
-			'Authorization': thisObj.token_type + ' ' + thisObj.token
-		}
+		jar: true
 	}
 	return this.invokeSSPost(reqOptions)
 }
@@ -174,11 +176,7 @@ SS3Client.prototype.getUserId = function() {
 	var reqOptions = {
 		url: 'https://api.simplisafe.com/v1/api/authCheck',
 		json: true,
-		jar: true,
-		headers: {
-			'Content-Type': 'application/json; charset=utf-8',
-			'Authorization': thisObj.token_type + ' ' + thisObj.token
-		}
+		jar: true
 	}
 	return this.invokeSSGet(reqOptions)
 }
@@ -188,11 +186,7 @@ SS3Client.prototype.getSub = function(subId) {
 	var reqOptions = {
 		url: 'https://api.simplisafe.com/v1/subscriptions/' + subId + '/',
 		json: true,
-		jar: true,
-		headers: {
-			'Content-Type': 'application/json; charset=utf-8',
-			'Authorization': thisObj.token_type + ' ' + thisObj.token
-		}
+		jar: true
 	}
 	return this.invokeSSGet(reqOptions)
 }
@@ -238,6 +232,328 @@ SS3Client.prototype.getAlarmStateNoRetry = function() {
 			var alarmState = parsedBody.subscription.location.system.alarmState
 			return alarmState
 		})
+}
+
+/*
+{
+  "account": "xxx",
+  "success": true,
+  "sensors": [
+    {
+      "status": {
+
+      },
+      "setting": {
+        "alarm": 1
+      },
+      "name": "Master BR",
+      "serial": "xxx",
+      "type": 3,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    },
+    {
+      "status": {
+
+      },
+      "setting": {
+        "instantTrigger": false,
+        "away2": 1,
+        "away": 1,
+        "home2": 0,
+        "home": 0,
+        "off": 0
+      },
+      "name": "Family Room",
+      "serial": "xxx",
+      "type": 4,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    },
+    {
+      "status": {
+
+      },
+      "setting": {
+        "instantTrigger": false,
+        "away2": 1,
+        "away": 1,
+        "home2": 0,
+        "home": 0,
+        "off": 0
+      },
+      "name": "Dining Room",
+      "serial": "xxx",
+      "type": 4,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    },
+    {
+      "status": {
+
+      },
+      "setting": {
+        "instantTrigger": false,
+        "away2": 1,
+        "away": 1,
+        "home2": 0,
+        "home": 0,
+        "off": 0
+      },
+      "name": "Upstairs",
+      "serial": "xxx",
+      "type": 4,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    },
+    {
+      "status": {
+        "triggered": false
+      },
+      "setting": {
+        "alarm": 1
+      },
+      "name": "Powder Room",
+      "serial": "xxx",
+      "type": 9,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    },
+    {
+      "status": {
+        "triggered": false
+      },
+      "setting": {
+        "alarm": 1
+      },
+      "name": "Bathroom",
+      "serial": "xxx",
+      "type": 9,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    },
+    {
+      "status": {
+        "triggered": false
+      },
+      "setting": {
+        "alarm": 1
+      },
+      "name": "Master Bath",
+      "serial": "xxx",
+      "type": 9,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    },
+    {
+      "status": {
+        "triggered": false
+      },
+      "setting": {
+        "alarm": 1
+      },
+      "name": "Waterheater",
+      "serial": "xxx",
+      "type": 9,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    },
+    {
+      "status": {
+        "test": false,
+        "tamper": false,
+        "malfunction": false,
+        "triggered": false
+      },
+      "setting": {
+
+      },
+      "name": "Bedroom",
+      "serial": "xxx",
+      "type": 8,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    },
+    {
+      "status": {
+        "test": false,
+        "tamper": false,
+        "malfunction": false,
+        "triggered": false
+      },
+      "setting": {
+
+      },
+      "name": "Office",
+      "serial": "xxx",
+      "type": 8,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    },
+    {
+      "status": {
+
+      },
+      "setting": {
+        "alarmVolume": 3,
+        "doorChime": 0,
+        "exitBeeps": 2,
+        "entryBeeps": 2
+      },
+      "name": "Front Door",
+      "serial": "xxx",
+      "type": 13,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    },
+    {
+      "status": {
+        "triggered": false
+      },
+      "setting": {
+        "instantTrigger": false,
+        "away2": 1,
+        "away": 1,
+        "home2": 1,
+        "home": 1,
+        "off": 0
+      },
+      "name": "Patio Door",
+      "serial": "xxx",
+      "type": 5,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    },
+    {
+      "status": {
+        "triggered": false
+      },
+      "setting": {
+        "instantTrigger": false,
+        "away2": 1,
+        "away": 1,
+        "home2": 1,
+        "home": 1,
+        "off": 0
+      },
+      "name": "Back Door",
+      "serial": "xxx",
+      "type": 5,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    },
+    {
+      "status": {
+        "triggered": false
+      },
+      "setting": {
+        "instantTrigger": false,
+        "away2": 1,
+        "away": 1,
+        "home2": 1,
+        "home": 1,
+        "off": 0
+      },
+      "name": "Front Door",
+      "serial": "xxx",
+      "type": 5,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    },
+    {
+      "status": {
+        "triggered": false
+      },
+      "setting": {
+        "instantTrigger": false,
+        "away2": 1,
+        "away": 1,
+        "home2": 1,
+        "home": 1,
+        "off": 0
+      },
+      "name": "Garage",
+      "serial": "xxx",
+      "type": 5,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    },
+    {
+      "status": {
+
+      },
+      "setting": {
+        "lowPowerMode": false,
+        "alarm": 1
+      },
+      "name": "Front Door",
+      "serial": "xxx",
+      "type": 1,
+      "flags": {
+        "swingerShutdown": false,
+        "lowBattery": false,
+        "offline": false
+      }
+    }
+  ],
+  "lastUpdated": 1523220141,
+  "lastSynced": 1523220141,
+  "lastStatusUpdate": 1523220138
+}
+ */
+SS3Client.prototype.getSensors = function() {
+	var thisObj = this
+	var reqOptions = {
+		url: 'https://api.simplisafe.com/v1/ss3/subscriptions/' + thisObj.subId + '/sensors?forceUpdate=false',
+		json: true,
+		jar: true
+	}
+	return this.invokeSSGet(reqOptions)
 }
 
 module.exports = SS3Client
