@@ -152,7 +152,7 @@ SS3Client.prototype.initUserId = function() {
 SS3Client.prototype.initSubId = function() {
 	var thisObj = this
 	var reqOptions = {
-		url: 'https://api.simplisafe.com/v1/users/' + thisObj.userId + '/subscriptions?activeOnly=false',
+		url: 'https://api.simplisafe.com/v1/users/' + thisObj.userId + '/subscriptions?activeOnly=true',
 		json: true,
 		jar: true
 	}
@@ -205,6 +205,7 @@ SS3Client.prototype.getUserId = function() {
 }
 
 SS3Client.prototype.getSub = function(subId) {
+	log('SS3Client is getting subscription details for sub ' + subId + '.')
 	var thisObj = this
 	var reqOptions = {
 		url: 'https://api.simplisafe.com/v1/subscriptions/' + subId + '/',
@@ -245,6 +246,7 @@ SS3Client.prototype.getAlarmState = function() {
 				setTimeout(retryGetAlarmState, self.retryInSec * 1000, retriesLeft)
 				return deferred.promise
 			} else {
+				log('SS3Client got alarm state: ' + alarmState + '. No Retry.')
 				return alarmState
 			}
 		})
