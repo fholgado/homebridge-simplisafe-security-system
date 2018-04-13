@@ -1,4 +1,4 @@
-var SS3Client = require('./ss3-client')
+var SS3Client = require('simplisafe-ss3')
 var Service, Characteristic;
 
 module.exports = function(homebridge) {
