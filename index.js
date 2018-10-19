@@ -54,6 +54,7 @@ function SimpliSafeSecuritySystemAccessory(log, config) {
 				break;
 			case "AWAY":
 			case 'AWAY_COUNT':
+			case 'ALARM_COUNT':
 				return Characteristic.SecuritySystemTargetState.AWAY_ARM;
 				break;
 			case "OFF":
