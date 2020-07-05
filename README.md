@@ -1,3 +1,6 @@
+# NOTE
+This project is archived and no longer maintained. Please instead refer to: https://github.com/nzapponi/homebridge-simplisafe3
+
 # homebridge-simplisafe-security-system
 
 This project is a [Homebridge](https://github.com/nfarina/homebridge) pluging that allows you to control your SimpliSafe alarm system with the iOS 10 Home app as well as through Siri. This project uses the [SimpliSafe SS3 node.js wrapper](https://github.com/chowielin/simplisafe-ss3-nodejs). To use this, you must have a working Homebridge server running in your network.
