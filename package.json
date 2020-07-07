@@ -24,7 +24,11 @@
     "url": "git://github.com/fholgado/homebridge-simplisafe-security-system.git"
   },
   "dependencies": {
-    "simplisafe": "1.0.0"
+    "lodash": "^4.13.1",
+    "q": "^1.5.1",
+    "request": "^2.72.0",
+    "request-promise-any": "^1.0.5",
+    "simplisafe-ss3": "^0.0.2"
   },
   "readmeFilename": "README.md",
   "bugs": {

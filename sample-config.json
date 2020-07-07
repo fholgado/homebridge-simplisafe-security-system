@@ -12,7 +12,9 @@
             "name": "Alarm System",
             "auth": {
                 "username": "your@email.com",
-                "password": "yourawesomepassword"
+                "password": "yourawesomepassword",
+                "retryInSec": 1,
+                "retries": 3
             }
         }
     ]
